@@ -1,10 +1,8 @@
 import { DefaultSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials"
-import { Session } from 'next-auth';
 import client from "@/app/db/index"
 import bcrypt from "bcryptjs"
 import { JWT } from "next-auth/jwt";
-import { number } from "zod";
 
 export interface CustomUser {
   id: number;
