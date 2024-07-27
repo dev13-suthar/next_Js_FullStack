@@ -1,85 +1,86 @@
-import { NextAuthOptions, User } from "next-auth";
+import { DefaultSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials"
+import { Session } from 'next-auth';
 import client from "@/app/db/index"
 import bcrypt from "bcryptjs"
 import { JWT } from "next-auth/jwt";
-import { Session } from "next-auth";
+import { number } from "zod";
+
+export interface CustomUser {
+  id: number;
+  name: string;
+  email: string;
+}
 
 interface CustomToken extends JWT {
-    id?: string;
-    emaill?: string;
-    username?: string;
+  id: number;
+  email: string;
+  name: string;
 }
 
-// Define the structure of your session user
-interface CustomSession extends Session {
-    user: {
-        id?: string;
-        emaill?: string;
-        username?: string;
-        name?: string | null;
-    }
+// Extend the NextAuth session to include custom properties
+export interface CustomSession extends DefaultSession {
+  user: CustomUser;
 }
 
-export const authOptions:NextAuthOptions = {
-    providers:[
-        CredentialsProvider({
-            name:"Credentials",
-            credentials:{
-                email:{label:"email",placeholder:"email",type:"text"},
-                password: { label: "Password", type: "password" }
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "email", type: "text", placeholder: "jsmith" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials: any): Promise<any> {
+        try {
+          const user = await client.user.findFirst({
+            where: {
+              email: credentials?.email,
             },
-            async authorize(credentials:any):Promise<any>{
-                try {
-                    const user = await client.user.findFirst({
-                        where:{
-                            emaill:credentials.email
-                        },
-                        select:{
-                            name:true,
-                            id:true,
-                            emaill:true,
-                            password:true
-                        }
-                    });
-                    if(!user){
-                        throw new Error("User not found")
-                    };
-                    const isPasswordMatch = await bcrypt.compare(credentials.password,user.password);
-                    if(isPasswordMatch){
-                        return user;
-                    }else{
-                        throw new Error("InCorrect Password")
-                    }
-                } catch (error:any) {
-                    throw new Error(error)
-                }
-            },
-        })
-    ],
-    callbacks:{
-        async jwt({token,user}){
-           if(user){
-            const customUser = user as User & { emaill?: string }; // Ensure emaill is part of the user object
-            (token as CustomToken).id = customUser.id ?? undefined;
-            (token as CustomToken).emaill = customUser.emaill ?? undefined;
-            (token as CustomToken).username = customUser.name ?? undefined;
-           }
-            return token;
-        },
-        async session({session,token}){
-            if (token) {
-                session.user = session.user || {};
-                (session as CustomSession).user.id = (token as CustomToken).id;
-                (session as CustomSession).user.emaill = (token as CustomToken).emaill;
-                (session as CustomSession).user.username = (token as CustomToken).username;
-            }
-            return session;
-        },
+          });
+          if (!user) {
+            throw new Error("User not Found");
+          }
+          const matchPassword = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+          if (matchPassword) {
+            return user;
+          } else {
+            throw new Error("Incorrect Password");
+          }
+        } catch (error: any) {
+          throw new Error(error);
+        }
+      },
+    }),
+  ],
+  secret:process.env.NEXTAUTH_SECRET,
+  session:{
+    strategy:"jwt"
+  },
+  callbacks:{
+    jwt: async ({ token, user }) => {
+      if (user && user.id) {
+        token.id = user.id as number;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
     },
-    secret:process.env.NEXTAUTH_SECRET,
-    session:{
-        strategy:"jwt",
+    session: async ({ session, token }) => {
+      if (token) {
+        session.user = {
+          id: token.id,
+          email: token.email,
+          name: token.name,
+        } as CustomUser;
+      }
+      return session;
     },
-    
-}   
+  },
+  pages:{
+    signIn:"/signin"
+  }
+};

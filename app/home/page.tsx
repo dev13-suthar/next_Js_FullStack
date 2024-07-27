@@ -1,13 +1,11 @@
-"use client"
-
-import { useSession } from "next-auth/react"
-import { authOptions } from "../lib/auth";
+import Appbar from "../components/Appbar";
+import MyAccount from "../components/MyAccount";
 
 const HomePage = () => {
-    const session = useSession();
   return (
-    <div className="p-4 text-white">
-        {JSON.stringify(session)}
+    <div className="text-white">
+      <Appbar/>
+      <MyAccount/>
     </div>
   )
 }

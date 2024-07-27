@@ -4,6 +4,7 @@ import { useState } from "react"
 import CustomButton from "./CustomButton"
 import { Signup } from "@/app/actions/user";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const SignupForm = () => {
   const [password, setpassword] = useState("");
@@ -37,7 +38,7 @@ const SignupForm = () => {
                 setisSubmitting(true)
                 const res = await Signup(email,password,username);
                 setisSubmitting(false)
-                console.log(res);
+                toast.success("Signed Up")
                 router.push("/signin")
             }}>{isSubmitting?"Registering...":"Register"}</CustomButton>
     </div>

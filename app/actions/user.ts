@@ -19,7 +19,7 @@ export const Signup = async(email:string,password:string,username:string)=>{
     const user = await client.$transaction(async tx=>{
         const myuser = await tx.user.create({
             data:{
-                emaill:parseData.data.email,
+                email:parseData.data.email,
                 password:hashedPassword,
                 name:parseData.data.username
             }

@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <main className="h-screen w-screen bg-black overflow-x-hidden">
         <LandingBar/>
-        <div className="relative h-screen">
+      <div className="relative h-screen">
       <div className="absolute inset-0 z-0">
         <Particles quantity={200}/>
       </div>
