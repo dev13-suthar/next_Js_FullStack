@@ -32,7 +32,7 @@ const CreditDebitForm = ({type,userId}:props) => {
         } else {
           const res = await SpendMoney(amount, title, category, userId);
           if (res === false) {
-            toast.error("Something Went Wrong");
+            toast.error("Something Went Wrong or Insufficient Money");
           } else {
             toast.success(res);
             router.push("/home")

@@ -38,5 +38,5 @@ export async function middleware(req: NextRequest) {
 
 // Specify which paths the middleware should run on
 export const config = {
-  matcher: ['/home', '/spend', '/pay', '/signin'], // Apply middleware to these paths
+  matcher: ['/home', '/spend', '/add', '/signin'], // Apply middleware to these paths
 };

@@ -3,6 +3,7 @@ import client from "@/app/db/index";
 import { AddmoneySchema, SpendmoneySchema } from "@/app/types/index";
 
 
+
 export const AddMoney = async(amount:number,title:string,category:string,userId:number)=>{
     const parseData = AddmoneySchema.safeParse({amount,title,category});
     if(!parseData.success){
@@ -59,15 +60,19 @@ export const SpendMoney = async(amount:number,title:string,category:string,userI
     if(!parseData.success){
         return false;
     }
+    const account = await client.account.findFirst({
+        where:{
+            userId:userId
+        }
+    });
+    if(!account){
+        return false
+    }
+    if(account.amount<amount){
+       return false;
+    }
     const createTxns = await client.$transaction(async tx=>{
-            const account = await tx.account.findFirst({
-                where:{
-                    userId:userId
-                }
-            });
-            if(!account){
-                return
-            }
+           
             let categoryName = await tx.category.findFirst({
                 where:{
                     name:category
@@ -131,6 +136,28 @@ export const getIncomeAmount = async(userId:number)=>{
             where:{
                 account_no:account?.id,
                 type:"Credit"
+            }
+        });
+        return amount;
+    })
+    if(!amount){
+        return 0
+    }
+    const totalAMount = amount.reduce((i,acc)=>i+acc.amount,0);
+    return totalAMount;
+}
+
+export const getExpenseAmount = async(userId:number)=>{
+    const amount = await client.$transaction(async tx =>{
+        const account = await tx.account.findFirst({
+            where:{
+                userId:Number(userId)
+            }
+        });
+        const amount = await tx.transaction.findMany({
+            where:{
+                account_no:account?.id,
+                type:"Debit"
             }
         });
         return amount;

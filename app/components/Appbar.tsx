@@ -8,10 +8,10 @@ const Appbar = () => {
     const {data}= useSession();
   return (
     <div className='p-2 flex gap-3 px-8 justify-between items-center bg-stone-950'>
-        <div className='flex gap-4'>
-            <Link href={"/"}>Home</Link>
-            <Link href={"/"}>Stats</Link>
-            <Link href={"/"}>About Us</Link>
+        <div className='flex gap-4 text-white'>
+            <Link href={"/home"}>Home</Link>
+            <Link href={"/statistics"}>Stats</Link>
+            <Link href={"/aboutus"}>About Us</Link>
         </div>
         <div className='flex gap-5 items-center '>
             {

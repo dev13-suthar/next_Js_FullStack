@@ -33,3 +33,34 @@ export const Signup = async(email:string,password:string,username:string)=>{
     })
     return `signed UP ${user.name}`
 }
+
+export const SpendByCategory = async(userId:number|null)=>{
+    const spendingByCategory = await client.transaction.groupBy({
+        by:["category_id"],
+        where:{
+            account:{
+                userId:Number(userId)
+            },
+            type:"Debit"
+        },
+        _sum:{
+            amount:true
+        }
+    });
+    const categoryId = spendingByCategory.map(sp=>sp.category_id);
+    const categoris = await client.category.findMany({
+        where:{
+            id:{
+                in:categoryId
+            }
+        }
+    });
+    const result = spendingByCategory.map(spending=>{
+        const category = categoris.find(cat=>cat.id===spending.category_id);
+        return {
+            category:category?.name,
+            totalAmount:spending._sum.amount
+        };
+    });
+    return result;
+}

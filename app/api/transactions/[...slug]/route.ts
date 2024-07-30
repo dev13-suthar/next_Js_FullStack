@@ -21,6 +21,9 @@ export const GET = async(req:NextRequest,{params:{slug}}:{params:{slug:string[]}
             where:{
                 account_no:userAccount.id
             },
+            orderBy:{
+                createdAt:'desc'
+            }
         });
         return NextResponse.json({
             transactions:transactions
