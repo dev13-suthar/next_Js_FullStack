@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@nivo/bar": "^0.87.0",
     "@nivo/pie": "^0.87.0",
     "@prisma/client": "^5.17.0",
     "bcryptjs": "^2.4.3",
